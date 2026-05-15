@@ -26,8 +26,13 @@ var pushDailyCmd = &cobra.Command{
 	Short: "聚合当日学习内容并推送",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dateStr, _ := cmd.Flags().GetString("date")
+		yesterday, _ := cmd.Flags().GetBool("yesterday")
 		if dateStr == "" {
-			dateStr = time.Now().Format("2006-01-02")
+			t := time.Now()
+			if yesterday {
+				t = t.AddDate(0, 0, -1)
+			}
+			dateStr = t.Format("2006-01-02")
 		}
 
 		vaultOverride, _ := cmd.Flags().GetString("vault")
@@ -246,6 +251,7 @@ var pushTestSearchCmd = &cobra.Command{
 
 func init() {
 	pushDailyCmd.Flags().String("date", "", "指定日期 (YYYY-MM-DD)，默认今日")
+	pushDailyCmd.Flags().Bool("yesterday", false, "推送前一天的记录（与 --date 互斥）")
 	pushDailyCmd.Flags().StringP("vault", "v", "", "覆盖 Vault 路径（默认从配置读取）")
 	pushCmd.AddCommand(pushDailyCmd)
 
