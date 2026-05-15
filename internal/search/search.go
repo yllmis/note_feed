@@ -36,10 +36,10 @@ func SearchByCategory(
 	llmClient *llm.Client,
 	topic llm.Topic,
 	maxArticles int,
-	googleAPIKey, googleCseID string,
+	tavilyAPIKey string,
 ) (*SearchResult, error) {
-	if googleAPIKey == "" || googleCseID == "" {
-		return nil, fmt.Errorf("Google Custom Search 未配置（需要 GOOGLE_API_KEY 和 GOOGLE_CSE_ID）")
+	if tavilyAPIKey == "" {
+		return nil, fmt.Errorf("Tavily API Key 未配置")
 	}
 
 	categoryCNStr := CategoryChinese(topic.Category)
@@ -53,7 +53,7 @@ func SearchByCategory(
 
 	query := categoryCNStr + " " + strings.Join(keywords, " ")
 
-	articles, err := SearchGoogle(googleAPIKey, googleCseID, query, maxArticles*2)
+	articles, err := SearchTavily(tavilyAPIKey, query, maxArticles*2)
 	if err != nil {
 		return nil, fmt.Errorf("搜索 [%s] 失败: %w", topic.Category, err)
 	}

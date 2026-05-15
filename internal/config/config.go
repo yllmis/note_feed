@@ -24,12 +24,11 @@ type LLMConfig struct {
 }
 
 type SearchConfig struct {
-	Google GoogleConfig `yaml:"google"`
+	Tavily TavilyConfig `yaml:"tavily"`
 }
 
-type GoogleConfig struct {
+type TavilyConfig struct {
 	APIKey string `yaml:"api_key"`
-	CseID  string `yaml:"cse_id"`
 }
 
 type PushConfig struct {
@@ -92,8 +91,7 @@ func Load(path string) (*Config, error) {
 	cfg.Push.Email.Password = resolveEnvRef(cfg.Push.Email.Password)
 	cfg.Push.Email.From = resolveEnvRef(cfg.Push.Email.From)
 	cfg.Push.Email.To = resolveEnvRef(cfg.Push.Email.To)
-	cfg.Search.Google.APIKey = resolveEnvRef(cfg.Search.Google.APIKey)
-	cfg.Search.Google.CseID = resolveEnvRef(cfg.Search.Google.CseID)
+	cfg.Search.Tavily.APIKey = resolveEnvRef(cfg.Search.Tavily.APIKey)
 
 	return cfg, nil
 }

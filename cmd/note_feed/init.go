@@ -68,12 +68,10 @@ llm:
   base_url: "https://api.deepseek.com"
 
 search:
-  # Google Custom Search
-  # API Key: https://console.cloud.google.com → APIs & Services → Credentials
-  # CSE ID: https://programmablesearchengine.google.com → 设置"搜索整个网络"
-  google:
-    api_key: "${GOOGLE_API_KEY}"
-    cse_id: "${GOOGLE_CSE_ID}"
+  # Tavily Search API（专为 AI 应用设计的搜索引擎）
+  # 注册获取 API Key: https://tavily.com
+  tavily:
+    api_key: "${TAVILY_API_KEY}"
 
 push:
   email:
@@ -102,8 +100,7 @@ db:
 		fmt.Println("   export EMAIL_USER=xxx@qq.com")
 		fmt.Println("   export EMAIL_PASS=授权码")
 		fmt.Println("   export EMAIL_TO=xxx@qq.com")
-		fmt.Println("   export GOOGLE_API_KEY=AIza...  # 可选，用于搜索")
-		fmt.Println("   export GOOGLE_CSE_ID=your_id   # 可选")
+		fmt.Println("   export TAVILY_API_KEY=tvly-xxx  # 注册: https://tavily.com")
 		return nil
 	},
 }

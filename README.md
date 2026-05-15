@@ -22,8 +22,7 @@ note_feed init -v /path/to/your/obsidian/vault
 
 # 设置环境变量
 export DEEPSEEK_API_KEY=sk-xxx
-export GOOGLE_API_KEY=AIza...
-export GOOGLE_CSE_ID=your_cse_id
+export TAVILY_API_KEY=tvly-xxx    # 注册: https://tavily.com
 export EMAIL_USER=your@email.com
 export EMAIL_PASS=smtp_authorization_code
 export EMAIL_TO=your@email.com
@@ -45,8 +44,7 @@ note_feed push daily
 |--------|------|
 | `vault_path` | Obsidian Vault 路径 |
 | `llm.api_key` | DeepSeek API Key（通过 `DEEPSEEK_API_KEY` 设置） |
-| `search.google.api_key` | Google Custom Search API Key（通过 `GOOGLE_API_KEY` 设置） |
-| `search.google.cse_id` | Google Custom Search Engine ID（通过 `GOOGLE_CSE_ID` 设置） |
+| `search.tavily.api_key` | Tavily Search API Key（通过 `TAVILY_API_KEY` 设置） |
 | `push.email` | SMTP 邮件配置（QQ 邮箱需使用授权码） |
 
 ## 命令
@@ -66,6 +64,6 @@ note_feed push daily
 - **语言**: Go (单二进制)
 - **数据库**: SQLite (modernc.org/sqlite，纯 Go 无 CGO)
 - **LLM**: DeepSeek API
-- **搜索**: Google Custom Search
+- **搜索**: Tavily Search API
 - **推送**: SMTP 邮件
 - **CLI**: cobra

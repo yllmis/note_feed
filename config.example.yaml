@@ -9,12 +9,10 @@ llm:
   base_url: "https://api.deepseek.com"
 
 search:
-  # Google Custom Search 配置
-  # API Key: https://console.cloud.google.com → APIs & Services → Credentials
-  # CSE ID: https://programmablesearchengine.google.com → 设置"搜索整个网络"
-  google:
-    api_key: "${GOOGLE_API_KEY}"
-    cse_id: "${GOOGLE_CSE_ID}"
+  # Tavily Search API（专为 AI 应用设计的搜索引擎）
+  # 注册获取 API Key: https://tavily.com
+  tavily:
+    api_key: "${TAVILY_API_KEY}"
 
 push:
   email:

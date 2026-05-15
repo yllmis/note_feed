@@ -113,7 +113,7 @@ var pushDailyCmd = &cobra.Command{
 		fmt.Println("正在搜索相关文章...")
 		var allResults []*search.SearchResult
 		for _, topic := range extraction.Topics {
-			result, err := search.SearchByCategory(dbConn, llmClient, topic, 3, cfg.Search.Google.APIKey, cfg.Search.Google.CseID)
+			result, err := search.SearchByCategory(dbConn, llmClient, topic, 3, cfg.Search.Tavily.APIKey)
 			if err != nil {
 				fmt.Printf("搜索 [%s] 失败: %v\n", topic.Category, err)
 				continue
@@ -214,21 +214,21 @@ var pushTestLLMCmd = &cobra.Command{
 
 var pushTestSearchCmd = &cobra.Command{
 	Use:   "search",
-	Short: "测试 Google Custom Search",
+	Short: "测试 Tavily Search API",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg, err := config.Load(configPath)
 		if err != nil {
 			return fmt.Errorf("加载配置失败: %w", err)
 		}
 
-		if cfg.Search.Google.APIKey == "" || cfg.Search.Google.CseID == "" {
-			return fmt.Errorf("Google 搜索未配置，请设置 GOOGLE_API_KEY 和 GOOGLE_CSE_ID")
+		if cfg.Search.Tavily.APIKey == "" {
+			return fmt.Errorf("Tavily 未配置，请设置 TAVILY_API_KEY")
 		}
 
 		keyword := "Redis 缓存穿透 布隆过滤器"
 		fmt.Printf("搜索: %s\n", keyword)
 
-		articles, err := search.SearchGoogle(cfg.Search.Google.APIKey, cfg.Search.Google.CseID, keyword, 3)
+		articles, err := search.SearchTavily(cfg.Search.Tavily.APIKey, keyword, 3)
 		if err != nil {
 			return fmt.Errorf("搜索失败: %w", err)
 		}
