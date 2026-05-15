@@ -113,7 +113,7 @@ var pushDailyCmd = &cobra.Command{
 		fmt.Println("正在搜索相关文章...")
 		var allResults []*search.SearchResult
 		for _, topic := range extraction.Topics {
-			result, err := search.SearchByCategory(dbConn, llmClient, topic, 3)
+			result, err := search.SearchByCategory(dbConn, llmClient, topic, 3, cfg.Search.Google.APIKey, cfg.Search.Google.CseID)
 			if err != nil {
 				fmt.Printf("搜索 [%s] 失败: %v\n", topic.Category, err)
 				continue
@@ -156,7 +156,15 @@ var pushDailyCmd = &cobra.Command{
 
 var pushTestCmd = &cobra.Command{
 	Use:   "test",
-	Short: "发送测试邮件验证配置",
+	Short: "运行测试验证各环节配置",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return cmd.Help()
+	},
+}
+
+var pushTestEmailCmd = &cobra.Command{
+	Use:   "email",
+	Short: "发送测试邮件验证 SMTP 配置",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg, err := config.Load(configPath)
 		if err != nil {
@@ -176,12 +184,92 @@ var pushTestCmd = &cobra.Command{
 	},
 }
 
+var pushTestLLMCmd = &cobra.Command{
+	Use:   "llm",
+	Short: "测试 LLM API 连接和响应",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg, err := config.Load(configPath)
+		if err != nil {
+			return fmt.Errorf("加载配置失败: %w", err)
+		}
+		if cfg.LLM.APIKey == "" {
+			return fmt.Errorf("请设置 DEEPSEEK_API_KEY 环境变量")
+		}
+
+		timeout, _ := time.ParseDuration(cfg.LLM.Timeout)
+		client := llm.NewClient(cfg.LLM.APIKey, cfg.LLM.Model, cfg.LLM.BaseURL, timeout)
+
+		fmt.Printf("正在测试 %s ...\n", cfg.LLM.BaseURL)
+		extraction, err := client.ExtractTopics("新增了 Redis 缓存穿透的布隆过滤器解决方案")
+		if err != nil {
+			return fmt.Errorf("LLM 测试失败: %w", err)
+		}
+		fmt.Printf("✓ LLM 连接正常，返回 %d 个知识点\n", len(extraction.Topics))
+		for _, t := range extraction.Topics {
+			fmt.Printf("  - %s: %s\n", t.Category, strings.Join(t.Keywords, ", "))
+		}
+		return nil
+	},
+}
+
+var pushTestSearchCmd = &cobra.Command{
+	Use:   "search",
+	Short: "测试搜索 API（Google / 掘金）",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg, err := config.Load(configPath)
+		if err != nil {
+			return fmt.Errorf("加载配置失败: %w", err)
+		}
+
+		keyword := "Redis 缓存穿透 布隆过滤器"
+		fmt.Printf("搜索: %s\n\n", keyword)
+
+		if cfg.Search.Google.APIKey != "" && cfg.Search.Google.CseID != "" {
+			fmt.Println("测试 Google 搜索...")
+			articles, err := search.SearchGoogle(cfg.Search.Google.APIKey, cfg.Search.Google.CseID, keyword, 3)
+			if err != nil {
+				fmt.Printf("Google 搜索失败: %v\n", err)
+			} else if len(articles) > 0 {
+				fmt.Printf("✓ Google 搜索返回 %d 条结果\n", len(articles))
+				for _, a := range articles {
+					fmt.Printf("  - %s\n    %s\n", a.Title, a.URL)
+				}
+				return nil
+			}
+			fmt.Println("Google 返回 0 条结果")
+		} else {
+			fmt.Println("Google 未配置，跳过")
+		}
+
+		fmt.Println("\n测试掘金搜索...")
+		articles, err := search.SearchJuejin(keyword, 3)
+		if err != nil {
+			fmt.Printf("掘金搜索失败: %v\n", err)
+			return nil
+		}
+		if len(articles) == 0 {
+			fmt.Println("掘金返回 0 条结果（API 可能已锁定）")
+			fmt.Println("提示: 配置 Google API Key 和 CSE ID 以使用搜索引擎")
+			return nil
+		}
+		fmt.Printf("掘金返回 %d 条结果\n", len(articles))
+		for _, a := range articles {
+			fmt.Printf("  - %s\n    %s\n", a.Title, a.URL)
+		}
+		return nil
+	},
+}
+
 func init() {
 	pushDailyCmd.Flags().String("date", "", "指定日期 (YYYY-MM-DD)，默认今日")
 	pushDailyCmd.Flags().StringP("vault", "v", "", "覆盖 Vault 路径（默认从配置读取）")
-	pushTestCmd.Flags().StringP("vault", "v", "", "覆盖 Vault 路径（默认从配置读取）")
 	pushCmd.AddCommand(pushDailyCmd)
+
+	pushTestCmd.AddCommand(pushTestEmailCmd)
+	pushTestCmd.AddCommand(pushTestLLMCmd)
+	pushTestCmd.AddCommand(pushTestSearchCmd)
 	pushCmd.AddCommand(pushTestCmd)
+
 	rootCmd.AddCommand(pushCmd)
 }
 

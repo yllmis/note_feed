@@ -51,7 +51,9 @@ note_feed push daily
 | `init` | 初始化配置、数据库、安装 git hook |
 | `cache-diff` | 缓存 commit diff（由 git hook 自动调用） |
 | `push daily` | 聚合当日学习内容并推送 |
-| `push test` | 发送测试邮件 |
+| `push test email` | 发送测试邮件 |
+| `push test llm` | 测试 DeepSeek API 连接 |
+| `push test search` | 测试搜索源（Google / 掘金） |
 | `config path` | 显示配置文件路径 |
 
 ## 技术栈
@@ -59,6 +61,6 @@ note_feed push daily
 - **语言**: Go (单二进制)
 - **数据库**: SQLite (modernc.org/sqlite，纯 Go 无 CGO)
 - **LLM**: DeepSeek API
-- **搜索**: 掘金 API
+- **搜索**: Google Custom Search（主）+ 掘金 API（备）
 - **推送**: SMTP 邮件
 - **CLI**: cobra

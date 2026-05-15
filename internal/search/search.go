@@ -36,6 +36,7 @@ func SearchByCategory(
 	llmClient *llm.Client,
 	topic llm.Topic,
 	maxArticles int,
+	googleAPIKey, googleCseID string,
 ) (*SearchResult, error) {
 	categoryCNStr := CategoryChinese(topic.Category)
 
@@ -47,9 +48,24 @@ func SearchByCategory(
 	}
 
 	query := categoryCNStr + " " + strings.Join(keywords, " ")
-	articles, err := SearchJuejin(query, maxArticles*2)
-	if err != nil {
-		return nil, fmt.Errorf("搜索 [%s] 失败: %w", topic.Category, err)
+
+	// Try Google first if configured
+	var articles []Article
+	if googleAPIKey != "" && googleCseID != "" {
+		var err error
+		articles, err = SearchGoogle(googleAPIKey, googleCseID, query, maxArticles*2)
+		if err != nil {
+			fmt.Printf("Google 搜索失败（%v），尝试掘金...\n", err)
+		}
+	}
+
+	// Fallback to 掘金
+	if len(articles) == 0 {
+		var err error
+		articles, err = SearchJuejin(query, maxArticles*2)
+		if err != nil {
+			return nil, fmt.Errorf("搜索 [%s] 失败: %w", topic.Category, err)
+		}
 	}
 
 	var filtered []Article
