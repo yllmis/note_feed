@@ -24,18 +24,12 @@ type LLMConfig struct {
 }
 
 type SearchConfig struct {
-	Juejin JuejinConfig `yaml:"juejin"`
 	Google GoogleConfig `yaml:"google"`
 }
 
-type JuejinConfig struct {
-	Enabled bool `yaml:"enabled"`
-}
-
 type GoogleConfig struct {
-	Enabled bool   `yaml:"enabled"`
-	APIKey  string `yaml:"api_key"`
-	CseID   string `yaml:"cse_id"`
+	APIKey string `yaml:"api_key"`
+	CseID  string `yaml:"cse_id"`
 }
 
 type PushConfig struct {
@@ -63,10 +57,7 @@ func Default() *Config {
 			Timeout: "30s",
 			BaseURL: "https://api.deepseek.com",
 		},
-		Search: SearchConfig{
-			Juejin: JuejinConfig{Enabled: true},
-			Google: GoogleConfig{Enabled: false},
-		},
+		Search: SearchConfig{},
 		Push: PushConfig{
 			Email: EmailConfig{
 				SMTPHost: "smtp.qq.com",

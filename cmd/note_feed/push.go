@@ -214,45 +214,29 @@ var pushTestLLMCmd = &cobra.Command{
 
 var pushTestSearchCmd = &cobra.Command{
 	Use:   "search",
-	Short: "测试搜索 API（Google / 掘金）",
+	Short: "测试 Google Custom Search",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg, err := config.Load(configPath)
 		if err != nil {
 			return fmt.Errorf("加载配置失败: %w", err)
 		}
 
-		keyword := "Redis 缓存穿透 布隆过滤器"
-		fmt.Printf("搜索: %s\n\n", keyword)
-
-		if cfg.Search.Google.APIKey != "" && cfg.Search.Google.CseID != "" {
-			fmt.Println("测试 Google 搜索...")
-			articles, err := search.SearchGoogle(cfg.Search.Google.APIKey, cfg.Search.Google.CseID, keyword, 3)
-			if err != nil {
-				fmt.Printf("Google 搜索失败: %v\n", err)
-			} else if len(articles) > 0 {
-				fmt.Printf("✓ Google 搜索返回 %d 条结果\n", len(articles))
-				for _, a := range articles {
-					fmt.Printf("  - %s\n    %s\n", a.Title, a.URL)
-				}
-				return nil
-			}
-			fmt.Println("Google 返回 0 条结果")
-		} else {
-			fmt.Println("Google 未配置，跳过")
+		if cfg.Search.Google.APIKey == "" || cfg.Search.Google.CseID == "" {
+			return fmt.Errorf("Google 搜索未配置，请设置 GOOGLE_API_KEY 和 GOOGLE_CSE_ID")
 		}
 
-		fmt.Println("\n测试掘金搜索...")
-		articles, err := search.SearchJuejin(keyword, 3)
+		keyword := "Redis 缓存穿透 布隆过滤器"
+		fmt.Printf("搜索: %s\n", keyword)
+
+		articles, err := search.SearchGoogle(cfg.Search.Google.APIKey, cfg.Search.Google.CseID, keyword, 3)
 		if err != nil {
-			fmt.Printf("掘金搜索失败: %v\n", err)
-			return nil
+			return fmt.Errorf("搜索失败: %w", err)
 		}
 		if len(articles) == 0 {
-			fmt.Println("掘金返回 0 条结果（API 可能已锁定）")
-			fmt.Println("提示: 配置 Google API Key 和 CSE ID 以使用搜索引擎")
+			fmt.Println("返回 0 条结果")
 			return nil
 		}
-		fmt.Printf("掘金返回 %d 条结果\n", len(articles))
+		fmt.Printf("✓ 返回 %d 条结果\n", len(articles))
 		for _, a := range articles {
 			fmt.Printf("  - %s\n    %s\n", a.Title, a.URL)
 		}

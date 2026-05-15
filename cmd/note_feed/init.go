@@ -68,10 +68,10 @@ llm:
   base_url: "https://api.deepseek.com"
 
 search:
-  juejin:
-    enabled: true
+  # Google Custom Search
+  # API Key: https://console.cloud.google.com → APIs & Services → Credentials
+  # CSE ID: https://programmablesearchengine.google.com → 设置"搜索整个网络"
   google:
-    enabled: false
     api_key: "${GOOGLE_API_KEY}"
     cse_id: "${GOOGLE_CSE_ID}"
 
@@ -97,11 +97,13 @@ db:
 			fmt.Println("✓ 配置文件已存在，跳过:", cfgAbsPath)
 		}
 
-		fmt.Println("\n✅ 初始化完成！请设置环境变量:")
+		fmt.Println("\n✅ 初始化完成！请设置以下环境变量:")
 		fmt.Println("   export DEEPSEEK_API_KEY=sk-xxx")
 		fmt.Println("   export EMAIL_USER=xxx@qq.com")
 		fmt.Println("   export EMAIL_PASS=授权码")
 		fmt.Println("   export EMAIL_TO=xxx@qq.com")
+		fmt.Println("   export GOOGLE_API_KEY=AIza...  # 可选，用于搜索")
+		fmt.Println("   export GOOGLE_CSE_ID=your_id   # 可选")
 		return nil
 	},
 }

@@ -38,6 +38,10 @@ func SearchByCategory(
 	maxArticles int,
 	googleAPIKey, googleCseID string,
 ) (*SearchResult, error) {
+	if googleAPIKey == "" || googleCseID == "" {
+		return nil, fmt.Errorf("Google Custom Search 未配置（需要 GOOGLE_API_KEY 和 GOOGLE_CSE_ID）")
+	}
+
 	categoryCNStr := CategoryChinese(topic.Category)
 
 	var keywords []string
@@ -49,23 +53,9 @@ func SearchByCategory(
 
 	query := categoryCNStr + " " + strings.Join(keywords, " ")
 
-	// Try Google first if configured
-	var articles []Article
-	if googleAPIKey != "" && googleCseID != "" {
-		var err error
-		articles, err = SearchGoogle(googleAPIKey, googleCseID, query, maxArticles*2)
-		if err != nil {
-			fmt.Printf("Google 搜索失败（%v），尝试掘金...\n", err)
-		}
-	}
-
-	// Fallback to 掘金
-	if len(articles) == 0 {
-		var err error
-		articles, err = SearchJuejin(query, maxArticles*2)
-		if err != nil {
-			return nil, fmt.Errorf("搜索 [%s] 失败: %w", topic.Category, err)
-		}
+	articles, err := SearchGoogle(googleAPIKey, googleCseID, query, maxArticles*2)
+	if err != nil {
+		return nil, fmt.Errorf("搜索 [%s] 失败: %w", topic.Category, err)
 	}
 
 	var filtered []Article

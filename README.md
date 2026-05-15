@@ -7,7 +7,7 @@
 ```
 git commit (笔记) → post-commit hook 缓存 diff
          → 每日定时聚合 diffs → DeepSeek 提炼知识点
-         → 掘金搜索相关文章 → LLM 生成摘要 → 邮件推送
+         → Google 搜索相关文章 → LLM 生成摘要 → 邮件推送
 ```
 
 ## 快速开始
@@ -16,18 +16,22 @@ git commit (笔记) → post-commit hook 缓存 diff
 # 安装
 go install github.com/yllmis/note_feed/cmd/note_feed@latest
 
-# 在 vault 目录初始化（安装 hook、创建配置和数据库）
-cd /path/to/your/obsidian/vault
-note_feed init
+# 初始化（在项目目录执行，指定 vault 路径）
+cd ~/go_projects/note_feed
+note_feed init -v /path/to/your/obsidian/vault
 
 # 设置环境变量
 export DEEPSEEK_API_KEY=sk-xxx
+export GOOGLE_API_KEY=AIza...
+export GOOGLE_CSE_ID=your_cse_id
 export EMAIL_USER=your@email.com
 export EMAIL_PASS=smtp_authorization_code
 export EMAIL_TO=your@email.com
 
-# 验证配置
-note_feed push test
+# 验证各环节
+note_feed push test llm
+note_feed push test search
+note_feed push test email
 
 # 手动触发每日推送
 note_feed push daily
@@ -40,8 +44,9 @@ note_feed push daily
 | 配置项 | 说明 |
 |--------|------|
 | `vault_path` | Obsidian Vault 路径 |
-| `llm.api_key` | DeepSeek API Key（通过环境变量 `DEEPSEEK_API_KEY` 设置） |
-| `search.juejin` | 掘金搜索（V1 默认开启，无需 key） |
+| `llm.api_key` | DeepSeek API Key（通过 `DEEPSEEK_API_KEY` 设置） |
+| `search.google.api_key` | Google Custom Search API Key（通过 `GOOGLE_API_KEY` 设置） |
+| `search.google.cse_id` | Google Custom Search Engine ID（通过 `GOOGLE_CSE_ID` 设置） |
 | `push.email` | SMTP 邮件配置（QQ 邮箱需使用授权码） |
 
 ## 命令
@@ -53,7 +58,7 @@ note_feed push daily
 | `push daily` | 聚合当日学习内容并推送 |
 | `push test email` | 发送测试邮件 |
 | `push test llm` | 测试 DeepSeek API 连接 |
-| `push test search` | 测试搜索源（Google / 掘金） |
+| `push test search` | 测试 Google Custom Search |
 | `config path` | 显示配置文件路径 |
 
 ## 技术栈
@@ -61,6 +66,6 @@ note_feed push daily
 - **语言**: Go (单二进制)
 - **数据库**: SQLite (modernc.org/sqlite，纯 Go 无 CGO)
 - **LLM**: DeepSeek API
-- **搜索**: Google Custom Search（主）+ 掘金 API（备）
+- **搜索**: Google Custom Search
 - **推送**: SMTP 邮件
 - **CLI**: cobra
