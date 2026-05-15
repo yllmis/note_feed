@@ -2,6 +2,7 @@ package push
 
 import (
 	"fmt"
+	"mime"
 	"net/smtp"
 	"strings"
 
@@ -16,7 +17,7 @@ func SendEmail(cfg config.EmailConfig, subject, htmlBody string) error {
 	headers := make(map[string]string)
 	headers["From"] = cfg.From
 	headers["To"] = cfg.To
-	headers["Subject"] = subject
+	headers["Subject"] = mime.BEncoding.Encode("utf-8", subject)
 	headers["MIME-Version"] = "1.0"
 	headers["Content-Type"] = "text/html; charset=UTF-8"
 
